@@ -15,7 +15,7 @@ import { PacketDirectionType } from "@/models/packet";
 
 export const useListener = (app = useAppStore()) => {
   const { managedSerialPorts } = storeToRefs(app);
-  const { addPacket, addPortData, getSerialPorts } = app;
+  const { addPortData, getSerialPorts } = app;
   const theme = useTheme();
 
   const themeChangedEventListener = ref<UnlistenFn>();
@@ -43,6 +43,7 @@ export const useListener = (app = useAppStore()) => {
 
       addPortData(packet.portName, packetDataString);
     } else {
+      /** todo: fix outgoing packets */
       addPortData(packet.portName, packetData.packetDirection.content.value);
     }
 

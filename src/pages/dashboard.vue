@@ -1,6 +1,5 @@
 <template>
     <div :class="['min-h-screen', isDarkTheme ? 'dark bg-gray-900' : 'bg-gray-50']">
-        <!-- App Bar -->
         <header class="bg-primary text-white shadow-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
@@ -62,6 +61,7 @@
                                         <p :class="['text-xs', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
                                             port.baudRate }} baud</p>
                                     </div>
+
                                     <button @click="disconnectPort(path)"
                                         class="ml-2 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                         Disconnect
@@ -88,32 +88,32 @@
                         <div v-if="loading" class="flex justify-center">
                             <v-progress-circular indeterminate color="primary" class="ma-4"></v-progress-circular>
                         </div>
-                        <div v-else-if="availablePorts.length === 0"
+                        <div v-else-if="managedSerialPorts.length === 0"
                             :class="['text-center py-4', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">
                             No COM ports detected
                         </div>
                         <ul v-else :class="['divide-y', isDarkTheme ? 'divide-gray-700' : 'divide-gray-200']">
-                            <li v-for="port in availablePorts" :key="port.path" class="py-4 flex justify-between">
+                            <li v-for="port in managedSerialPorts" :key="port.name" class="py-4 flex justify-between">
                                 <div class="flex items-center">
                                     <v-icon icon="mdi-usb" :class="[isDarkTheme ? 'text-gray-400' : 'text-gray-500']"
                                         class="mr-3" />
                                     <div>
                                         <p
                                             :class="['text-sm font-medium', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
-                                            {{ port.path }}</p>
-                                        <p :class="['text-sm', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
-                                            port.manufacturer || 'Unknown manufacturer' }}</p>
+                                            {{ port.name }}</p>
+                                        <p :class="['text-xs', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
+                                            port.subscribedTo.length }} subscriptions</p>
                                     </div>
                                 </div>
                                 <div>
-                                    <button @click="connectToPort(port.path)" :disabled="connectedPorts[port.path]"
-                                        :class="[
+                                    <button @click="connectToPort(port.name, port.lastUsedOpenOptions)"
+                                        :disabled="connectedPorts[port.name] ? true : false" :class="[
                                             'inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                            connectedPorts[port.path]
+                                            connectedPorts[port.name]
                                                 ? 'bg-green-600 cursor-default'
                                                 : 'bg-primary hover:bg-primary-darken focus:ring-primary'
                                         ]">
-                                        {{ connectedPorts[port.path] ? 'Connected' : 'Connect' }}
+                                        {{ connectedPorts[port.name] ? 'Connected' : 'Connect' }}
                                     </button>
                                 </div>
                             </li>
@@ -170,8 +170,8 @@
                                         : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                                 ]" placeholder="Enter data to send..." @keyup.enter="sendDataToPort" />
                                 <button @click="sendDataToPort" :disabled="!selectedPortForSending || !sendData.trim()"
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary-darken disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <v-icon icon="mdi-send" />
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary-darken disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                                    <v-icon class="mb-6" icon="mdi-send" />
                                 </button>
                             </div>
                         </div>
@@ -211,15 +211,16 @@
                                 <label
                                     :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Data
                                     Bits</label>
-                                <v-select v-model="portConfig.dataBits" :items="[5, 6, 7, 8]" density="compact"
-                                    :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
+                                <v-select v-model="portConfig.dataBits"
+                                    :items="[DataBits.Eight, DataBits.Five, DataBits.Seven, DataBits.Six]"
+                                    density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
                                 <label
                                     :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Stop
                                     Bits</label>
-                                <v-select v-model="portConfig.stopBits" :items="[1, 2]" density="compact"
-                                    :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
+                                <v-select v-model="portConfig.stopBits" :items="[StopBits.One, StopBits.Two]"
+                                    density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
                                 <label
@@ -246,11 +247,21 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useTheme } from 'vuetify';
 
-import { getSerialPorts } from '@/api/api';
+import { getSerialPorts, openSerialPort } from '@/api/api';
+import { storeToRefs } from 'pinia';
+import { useAppStore } from '@/stores/app';
+import { DataBits, FlowControl, OpenSerialPortOptions, Parity, StopBits } from '@/models/open-options';
+import { ReadState, StatusType } from '@/models/managed-serial-port';
+
+
+const app = useAppStore();
+
+const { portData, managedSerialPorts, } = storeToRefs(app)
+const { addPortData } = app
 
 // Vuetify theme
 const theme = useTheme();
@@ -262,21 +273,29 @@ const toggleTheme = () => {
 };
 
 // State
-const availablePorts = ref([]);
-const connectedPorts = ref({});
+
+const connectedPorts = ref<Record<string, OpenSerialPortOptions>>({});
 const loading = ref(false);
-const portData = ref({});
-const sendData = ref('');
-const autoScroll = ref(true);
-const dataMonitor = ref(null);
+
+
+const sendData = ref<string>('');
+const autoScroll = ref<boolean>(true);
+const dataMonitor = ref<{ scrollTop: number, scrollHeight: number } | null>(null);
 const selectedPortForMonitor = ref('all');
 const selectedPortForSending = ref('');
 const selectedPortForConfig = ref('');
-const portConfig = ref({
-    baudRate: 9600,
-    dataBits: 8,
-    stopBits: 1,
-    parity: 'none'
+const portConfig = ref<OpenSerialPortOptions>({
+    baudRate: 115200,
+    dataBits: DataBits.Eight,
+    stopBits: StopBits.One,
+    parity: Parity.None,
+    flowControl: FlowControl.Hardware,
+    initialReadState: ReadState.Read,
+    tag: '',
+    timeout: {
+        nanos: 0,
+        secs: 0,
+    },
 });
 
 // Constants
@@ -307,10 +326,10 @@ const configPortItems = computed(() => {
     return items;
 });
 
-const filteredData = computed(() => {
+const filteredData = computed<string[]>(() => {
     if (selectedPortForMonitor.value === 'all') {
         // Flatten all port data into a single array
-        const allData = [];
+        const allData: string[] = [];
         for (const path in portData.value) {
             portData.value[path].forEach(line => {
                 allData.push(`[${path}] ${line}`);
@@ -332,28 +351,36 @@ const refreshPorts = async () => {
     try {
         // In a real application, you would use the Web Serial API or a backend service
         // to get the available ports. For this demo, we'll simulate it.
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        availablePorts.value = [
-            { path: 'COM1', manufacturer: 'Standard Serial Port' },
-            { path: 'COM3', manufacturer: 'Arduino' },
-            { path: 'COM5', manufacturer: 'FTDI' },
-            { path: 'COM7', manufacturer: 'Silicon Labs CP210x' },
-            { path: 'COM9', manufacturer: 'Prolific PL2303' }
-        ];
-    } catch (error) {
+        getSerialPorts().then(ports => {
+            managedSerialPorts.value = ports;
+        });
+
+        managedSerialPorts.value.forEach(port => {
+            if (port.status.type === StatusType.Open) {
+
+                connectedPorts.value[port.name] = port.lastUsedOpenOptions
+            }
+        });
+
+
+
+    } catch (error: unknown) {
         console.error('Error refreshing ports:', error);
-        addPortData('system', `Error: ${error.message}`);
+        addPortData('system', `Error: ${(error as Record<string, string>).message}`);
     } finally {
         loading.value = false;
     }
 };
 
-const connectToPort = async (portPath) => {
+const connectToPort = async (portPath: string, options: OpenSerialPortOptions) => {
     try {
         // In a real application, you would use the Web Serial API or a backend service
         // to connect to the port. For this demo, we'll simulate it.
-        await new Promise(resolve => setTimeout(resolve, 500));
+
+        connectedPorts.value[portPath] = options
+
+        await openSerialPort(portPath, options);
 
         // Initialize port data array if it doesn't exist
         if (!portData.value[portPath]) {
@@ -361,12 +388,7 @@ const connectToPort = async (portPath) => {
         }
 
         // Store port configuration
-        connectedPorts.value[portPath] = {
-            baudRate: portConfig.value.baudRate,
-            dataBits: portConfig.value.dataBits,
-            stopBits: portConfig.value.stopBits,
-            parity: portConfig.value.parity
-        };
+        connectedPorts.value[portPath] = options
 
         // Set as selected port if it's the first one
         if (Object.keys(connectedPorts.value).length === 1) {
@@ -381,20 +403,17 @@ const connectToPort = async (portPath) => {
         addPortData(portPath, `Stop bits: ${portConfig.value.stopBits}`);
         addPortData(portPath, `Parity: ${portConfig.value.parity}`);
         addPortData(portPath, 'Waiting for data...');
-
-        // Simulate receiving data for this port
-        simulateDataReceiving(portPath);
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error connecting to port:', error);
-        addPortData(portPath, `Error: ${error.message}`);
+        addPortData(portPath, `Error:  ${(error as Record<string, string>).message}`);
     }
 };
 
-const disconnectPort = async (portPath) => {
+const disconnectPort = async (portPath: string) => {
     try {
         // In a real application, you would use the Web Serial API or a backend service
         // to disconnect from the port. For this demo, we'll simulate it.
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await app.closeSerialPort(portPath)
 
         addPortData(portPath, `Disconnected from ${portPath}`);
 
@@ -416,7 +435,7 @@ const disconnectPort = async (portPath) => {
         }
     } catch (error) {
         console.error('Error disconnecting from port:', error);
-        addPortData(portPath, `Error: ${error.message}`);
+        addPortData(portPath, `Error: ${(error as Record<string, string>).message}`);
     }
 };
 
@@ -426,8 +445,14 @@ const sendDataToPort = async () => {
     const portPath = selectedPortForSending.value;
 
     try {
+
+        await app.sendToSerialPort(portPath, sendData.value)
+        await app.sendToSerialPort(portPath, sendData.value)
+        await app.sendToSerialPort(portPath, sendData.value)
+
         // In a real application, you would use the Web Serial API or a backend service
         // to send data to the port. For this demo, we'll simulate it.
+
         addPortData(portPath, `TX: ${sendData.value}`);
 
         // Simulate a response
@@ -439,7 +464,7 @@ const sendDataToPort = async () => {
         sendData.value = '';
     } catch (error) {
         console.error('Error sending data:', error);
-        addPortData(portPath, `Error: ${error.message}`);
+        addPortData(portPath, `Error: ${(error as Record<string, string>).message}`);
     }
 };
 
@@ -463,7 +488,9 @@ const toggleAutoScroll = () => {
 const scrollToBottom = () => {
     if (autoScroll.value && dataMonitor.value) {
         nextTick(() => {
-            dataMonitor.value.scrollTop = dataMonitor.value.scrollHeight;
+            if (dataMonitor.value) {
+                dataMonitor.value.scrollTop = dataMonitor.value.scrollHeight;
+            }
         });
     }
 };
@@ -474,12 +501,7 @@ const applyPortConfig = () => {
     const portPath = selectedPortForConfig.value;
 
     // Update port configuration
-    connectedPorts.value[portPath] = {
-        baudRate: portConfig.value.baudRate,
-        dataBits: portConfig.value.dataBits,
-        stopBits: portConfig.value.stopBits,
-        parity: portConfig.value.parity
-    };
+    connectedPorts.value[portPath] = portConfig.value
 
     addPortData(portPath, 'Applying new configuration:');
     addPortData(portPath, `Baud rate: ${portConfig.value.baudRate}`);
@@ -489,48 +511,19 @@ const applyPortConfig = () => {
     scrollToBottom();
 };
 
-const addPortData = (portPath, message) => {
-    // Initialize port data array if it doesn't exist
-    if (!portData.value[portPath]) {
-        portData.value[portPath] = [];
-    }
 
-    // Add message to port data
-    portData.value[portPath].push(message);
-
-    // Ensure reactivity by creating a new object
-    portData.value = { ...portData.value };
-
-    scrollToBottom();
-};
-
-const simulateDataReceiving = (portPath) => {
-    if (!connectedPorts.value[portPath]) return;
-
-    const messages = [
-        `RX: Device ready on ${portPath}`,
-        `RX: Temperature: ${(20 + Math.random() * 10).toFixed(1)}°C`,
-        `RX: Humidity: ${Math.floor(40 + Math.random() * 20)}%`,
-        `RX: Pressure: ${Math.floor(1000 + Math.random() * 30)} hPa`,
-        `RX: Status: OK from ${portPath}`
-    ];
-
-    let index = 0;
-    const interval = setInterval(() => {
-        if (!connectedPorts.value[portPath]) {
-            clearInterval(interval);
-            return;
-        }
-
-        addPortData(portPath, messages[index % messages.length]);
-        index++;
-    }, 3000 + Math.random() * 4000); // Random interval to simulate different devices
-};
 
 // Lifecycle hooks
 onMounted(() => {
     refreshPorts();
 });
+
+watch(portData, () => {
+    if (autoScroll.value) {
+        scrollToBottom();
+    }
+}, { deep: true });
+
 
 // Watchers
 watch(connectedPorts, (newVal) => {
