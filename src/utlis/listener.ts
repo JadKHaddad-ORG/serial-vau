@@ -11,10 +11,11 @@ import {
 } from "@/api/listener";
 import { useAppStore } from "@/stores/app";
 import { useTheme } from "vuetify";
+import { PacketDirectionType } from "@/models/packet";
 
 export const useListener = (app = useAppStore()) => {
   const { managedSerialPorts } = storeToRefs(app);
-  const { addPacket, getSerialPorts } = app;
+  const { addPacket, addPortData, getSerialPorts } = app;
   const theme = useTheme();
 
   const themeChangedEventListener = ref<UnlistenFn>();
@@ -37,7 +38,16 @@ export const useListener = (app = useAppStore()) => {
       timestampMillis: packet.timestampMillis,
     };
 
-    addPacket(packet.portName, packetData);
+    if (packetData.packetDirection.type === PacketDirectionType.Incoming) {
+      const packetDataString = `Incoming: ${packetData.packetDirection.content.line}`;
+
+      addPortData(packet.portName, packetDataString);
+    } else {
+      addPortData(packet.portName, packetData.packetDirection.content.value);
+    }
+
+    /** todo: remove this massive memory killer */
+    // addPacket(packet.portName, packetData);
   };
 
   const onSerialPortEventListener = (event: Event<ManagedSerialPortsEvent>) => {
