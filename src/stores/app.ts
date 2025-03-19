@@ -64,11 +64,12 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function toggleReadState(name: string) {
-    api
+  async function toggleReadState(name: string) {
+    await api
       .toggleReadState(name)
       .then((response) => {
         managedSerialPorts.value = response;
+        return response;
       })
       .catch((error) => {
         console.error("Error toggling read state:", error);

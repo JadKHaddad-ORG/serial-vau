@@ -48,11 +48,11 @@
                             <h3 :class="['text-sm font-medium mb-3', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
                                 {{ Object.keys(connectedPorts).length }} port(s) connected
                             </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                                 <div v-for="(port, path) in connectedPorts" :key="path"
                                     :class="['flex items-center p-3 border rounded-md', isDarkTheme ? 'border-gray-700' : 'border-gray-200']">
                                     <div class="flex-shrink-0">
-                                        <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                                        <div class="h-3 w-3 rounded-full" :class="getStatusTypebyPort(path)" />
                                     </div>
                                     <div class="ml-3 flex-1">
                                         <h3
@@ -61,7 +61,10 @@
                                         <p :class="['text-xs', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
                                             port.baudRate }} baud</p>
                                     </div>
-
+                                    <button @click="togglePortReadState(path)"
+                                        class="ml-2 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-white-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Toggle Read
+                                    </button>
                                     <button @click="disconnectPort(path)"
                                         class="ml-2 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                         Disconnect
@@ -178,7 +181,7 @@
                         <div ref="dataMonitor"
                             class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-md h-64 overflow-y-auto">
                             <div v-for="(line, index) in filteredData" :key="index" class="whitespace-pre-wrap">
-                                {{ line }}
+                                <span>{{ line }}</span>
                             </div>
                         </div>
                     </div>
@@ -260,7 +263,7 @@ import { ReadState, StatusType } from '@/models/managed-serial-port';
 
 const app = useAppStore();
 
-const { portData, managedSerialPorts, } = storeToRefs(app)
+const { portData, managedSerialPorts } = storeToRefs(app)
 const { addPortData } = app
 
 // Vuetify theme
@@ -380,7 +383,7 @@ const connectToPort = async (portPath: string, options: OpenSerialPortOptions) =
 
         connectedPorts.value[portPath] = options
 
-        await openSerialPort(portPath, options);
+        managedSerialPorts.value = await openSerialPort(portPath, options);
 
         // Initialize port data array if it doesn't exist
         if (!portData.value[portPath]) {
@@ -408,6 +411,33 @@ const connectToPort = async (portPath: string, options: OpenSerialPortOptions) =
         addPortData(portPath, `Error:  ${(error as Record<string, string>).message}`);
     }
 };
+
+const togglePortReadState = async (portPath: string) => {
+    if (!connectedPorts.value[portPath]) return;
+
+    await app.toggleReadState(portPath);
+};
+
+const getStatusTypebyPort = (path: string): string => {
+
+    const status = managedSerialPorts.value.find(port => port.name === path)?.status
+
+    switch (status?.type) {
+        case StatusType.Open:
+
+            switch (status.content.readState) {
+                case ReadState.Read:
+                    return 'bg-green-500';
+                case ReadState.Stop:
+                    return 'bg-yellow-500';
+            }
+        case StatusType.Closed:
+            return 'bg-red-500';
+        default:
+            return 'bg-gray-500';
+    }
+};
+
 
 const disconnectPort = async (portPath: string) => {
     try {
