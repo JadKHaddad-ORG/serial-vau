@@ -8,14 +8,26 @@ use command::{
     subscribe::{subscribe_intern, unsubscribe_intern},
     toggle_read_state::toggle_read_state_intern,
 };
-use futures::StreamExt;
 use error::AppError;
-use event::{emit_error::emit_error_event, emit_managed_serial_ports::emit_managed_serial_ports_event, model::error::ErrorEvent};
+use event::{
+    emit_error::emit_error_event, emit_managed_serial_ports::emit_managed_serial_ports_event,
+    model::error::ErrorEvent,
+};
+use futures::StreamExt;
 use model::{managed_serial_port::ManagedSerialPort, open_options::OpenSerialPortOptions};
-use state::TauriAppState as TauriAppState;
+use state::TauriAppState;
 use tauri::{AppHandle, Manager, State};
 
-use crate::{app::{database::database_impl::sqlite_database_service::SqliteDatabase, state::AppState}, serial_manager::serial_manager_impl::tokio_serial_manager::TokioSerialManager, watcher::{model::WatcherEventType, watcher_impl::watcher::WatcherImpl, watcher_service::WatcherService, Watcher}};
+use crate::{
+    app::{database::database_impl::sqlite_database_service::SqliteDatabase, state::AppState},
+    serial_manager::serial_manager_impl::{
+        dummy_serial_manager::DummySerialManager, tokio_serial_manager::TokioSerialManager,
+    },
+    watcher::{
+        model::WatcherEventType, watcher_impl::watcher::WatcherImpl,
+        watcher_service::WatcherService, Watcher,
+    },
+};
 
 mod command;
 mod error;
@@ -28,9 +40,7 @@ mod state;
 pub async fn get_serial_ports(
     state: State<'_, TauriAppState>,
 ) -> Result<Vec<ManagedSerialPort>, AppError> {
-    get_serial_ports_intern(&state)
-        .await
-        .map_err(Into::into)
+    get_serial_ports_intern(&state).await.map_err(Into::into)
 }
 
 #[tauri::command]
@@ -86,9 +96,7 @@ pub async fn subscribe(
     to: &str,
     state: State<'_, TauriAppState>,
 ) -> Result<Vec<ManagedSerialPort>, AppError> {
-    subscribe_intern(from, to, &state)
-        .await
-        .map_err(Into::into)
+    subscribe_intern(from, to, &state).await.map_err(Into::into)
 }
 
 #[tauri::command]
@@ -131,16 +139,24 @@ fn create_db_blocking() -> Result<SqliteDatabase, anyhow::Error> {
             if !db_file_dir.exists() {
                 tracing::info!("Creating .serial-vau directory at {:?}", db_file_dir);
 
-                tokio::fs::create_dir_all(&db_file_dir).await.context("Error creating .serial-vau directory")?;
+                tokio::fs::create_dir_all(&db_file_dir)
+                    .await
+                    .context("Error creating .serial-vau directory")?;
             }
-        
+
             tracing::info!("Creating sqlite.db file at {:?}", db_file_path);
 
-            let _ = tokio::fs::File::create(&db_file_path).await.context("Error creating sqlite.db")?;
+            let _ = tokio::fs::File::create(&db_file_path)
+                .await
+                .context("Error creating sqlite.db")?;
         }
 
-        let db_file_path_str = db_file_path.to_str().context("Error converting db_file_path to str")?;
-        let db = SqliteDatabase::new(&format!("sqlite:{db_file_path_str}")).await.context("Error creating SqliteDatabase")?;
+        let db_file_path_str = db_file_path
+            .to_str()
+            .context("Error converting db_file_path to str")?;
+        let db = SqliteDatabase::new(&format!("sqlite:{db_file_path_str}"))
+            .await
+            .context("Error creating SqliteDatabase")?;
 
         tracing::info!("Running database migrations");
 
@@ -148,12 +164,13 @@ fn create_db_blocking() -> Result<SqliteDatabase, anyhow::Error> {
 
         anyhow::Result::<SqliteDatabase>::Ok(db)
     })?;
-    
+
     Ok(db)
 }
 
 pub fn run() -> anyhow::Result<()> {
-    let serial_manager = TokioSerialManager::new();
+    let _serial_manager = TokioSerialManager::new();
+    let serial_manager = DummySerialManager::new();
 
     let db = create_db_blocking()?;
 
@@ -161,8 +178,8 @@ pub fn run() -> anyhow::Result<()> {
     let app_state = AppState::new(db.into(), serial_manager.into());
 
     let tauri_app_state = TauriAppState::new(app_state);
-    
-    let tauri_app_state_wachter = tauri_app_state.clone();
+
+    let tauri_app_state_watcher = tauri_app_state.clone();
     tauri::Builder::default()
         .manage(tauri_app_state)
         .setup(|app| {
@@ -173,7 +190,7 @@ pub fn run() -> anyhow::Result<()> {
                     let _ = pool
                         .spawn_pinned(|| async move {
                             let watcher: Watcher = WatcherImpl::new()?.into();
-                        
+
                             let mut stream = std::pin::pin!(watcher.events_stream()?);
 
                             tracing::debug!("Starting serial events watcher");
@@ -182,7 +199,7 @@ pub fn run() -> anyhow::Result<()> {
                                 match event {
                                     Err(err) => {
                                         tracing::warn!(%err, "Serial event error");
-                                        
+
                                         let error_event = ErrorEvent::from(err);
 
                                         let _ = emit_error_event(&app_handle, &error_event);
@@ -199,7 +216,7 @@ pub fn run() -> anyhow::Result<()> {
                                     },
                                 }
 
-                                let _ = emit_managed_serial_ports_event(&app_handle, &tauri_app_state_wachter).await;
+                                let _ = emit_managed_serial_ports_event(&app_handle, &tauri_app_state_watcher).await;
                             }
 
                             tracing::debug!("Serial events watcher terminated");
@@ -208,7 +225,7 @@ pub fn run() -> anyhow::Result<()> {
                         })
                         .await;
                 });
-            
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -225,4 +242,3 @@ pub fn run() -> anyhow::Result<()> {
         .run(tauri::generate_context!())
         .context("Error while running tauri application")
 }
-
