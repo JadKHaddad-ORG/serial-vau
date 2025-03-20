@@ -7,7 +7,7 @@ export enum SerialVauApi {
   OPEN_SERIAL_PORT = "open_serial_port",
   CLOSE_SERIAL_PORT = "close_serial_port",
   SEND_TO_SERIAL_PORTS = "send_to_all_serial_ports",
-  SEND_TO_SERIAL_PORT = "send_to_all_serial_port",
+  SEND_TO_SERIAL_PORT = "send_to_serial_port",
   TOGGLE_READ_STATE = "toggle_read_state",
   SUBSCRIBE = "subscribe",
   UNSUBSCRIBE = "unsubscribe",

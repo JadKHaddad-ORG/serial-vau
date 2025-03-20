@@ -9,7 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppDrawer: typeof import('./components/AppDrawer.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
-    AppSidebar: typeof import('./components/new/AppSidebar.vue')['default']
     Breadcrumb: typeof import('./components/ui/breadcrumb/Breadcrumb.vue')['default']
     BreadcrumbEllipsis: typeof import('./components/ui/breadcrumb/BreadcrumbEllipsis.vue')['default']
     BreadcrumbItem: typeof import('./components/ui/breadcrumb/BreadcrumbItem.vue')['default']
