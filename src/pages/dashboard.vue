@@ -343,7 +343,7 @@ const filteredData = computed<string[]>(() => {
     } else {
         // Return data only for the selected port
         return (portData.value[selectedPortForMonitor.value] || []).map(
-            line => `[${selectedPortForMonitor.value}] ${line}`
+            line => `[${selectedPortForMonitor.value}]${line}`
         );
     }
 });
@@ -477,17 +477,12 @@ const sendDataToPort = async () => {
     try {
 
         await app.sendToSerialPort(portPath, sendData.value)
-        await app.sendToSerialPort(portPath, sendData.value)
-        await app.sendToSerialPort(portPath, sendData.value)
 
         // In a real application, you would use the Web Serial API or a backend service
         // to send data to the port. For this demo, we'll simulate it.
 
-        addPortData(portPath, `TX: ${sendData.value}`);
-
         // Simulate a response
         setTimeout(() => {
-            addPortData(portPath, `RX: ACK "${sendData.value}"`);
             scrollToBottom();
         }, 300);
 
