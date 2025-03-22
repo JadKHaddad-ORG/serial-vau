@@ -1,11 +1,6 @@
 <template>
   <v-list height="55vh" width="100%">
-    <v-list-item
-      v-for="(packet, index) in packets"
-      variant="elevated"
-      :key="index"
-      class="px-4 my-1"
-    >
+    <v-list-item v-for="(packet, index) in packets" variant="elevated" :key="index" class="px-4 my-1">
       <v-list-item-title class="pa-auto">
         <message-list-item :packet="packetData(packet)" />
       </v-list-item-title>
@@ -15,7 +10,7 @@
 
 <script lang="ts" setup>
 import { PacketData } from "@/models/intern/packet-data";
-import {type PacketDataType } from "@/components/com/MessageListItem.vue"
+import { type PacketDataType } from "@/components/com/MessageListItem.vue"
 import {
   PacketDirectionType,
   PacketOrigin,
@@ -53,6 +48,7 @@ const packetData = (packet: PacketData): PacketDataType => {
   let from: string | Date | undefined = undefined;
 
   if (packet.packetDirection.type === PacketDirectionType.Incoming) {
+    /** Returns an incoming packet data */
     return getPacketData(time, packet.packetDirection.content.line, "Incoming");
   }
 
@@ -63,7 +59,7 @@ const packetData = (packet: PacketData): PacketDataType => {
   if (origin.type === PacketOriginType.Subscription) {
     from = origin.content.name;
   }
-
+  /** Returns an subscription outgoing packet data */
   return getPacketData(time, message, typeString, from);
 };
 </script>
