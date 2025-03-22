@@ -48,19 +48,19 @@ export const useListener = (app = useAppStore()) => {
           case PacketOriginType.Direct:
             addPortData(
               packet.portName,
-              `Direct ${packetDirectonContent.value}`
+              `Direct: ${packetDirectonContent.value}`
             );
             break;
           case PacketOriginType.Broadcast:
             addPortData(
               packet.portName,
-              `Broadcast ${packetDirectonContent.value}`
+              `Broadcast: ${packetDirectonContent.value}`
             );
             break;
           case PacketOriginType.Subscription:
             addPortData(
               packet.portName,
-              `Subscription ${packetDirectonContent.value} from ${packetDirectonContent.packetOrigin.content.name}`
+              `Subscription[${packetDirectonContent.packetOrigin.content.name}]: ${packetDirectonContent.value}`
             );
             break;
         }
