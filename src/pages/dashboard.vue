@@ -24,11 +24,17 @@
         <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <!-- Connection Status -->
             <div class="px-4 py-6 sm:px-0">
-                <div
-                    :class="['overflow-hidden shadow rounded-lg divide-y', isDarkTheme ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200']">
+                <div :class="[
+                    'overflow-hidden shadow rounded-lg divide-y',
+                    isDarkTheme
+                        ? 'bg-gray-800 divide-gray-700'
+                        : 'bg-white divide-gray-200',
+                ]">
                     <div class="px-4 py-5 sm:px-6">
-                        <h3
-                            :class="['text-lg leading-6 font-medium flex items-center', isDarkTheme ? 'text-white' : 'text-gray-900']">
+                        <h3 :class="[
+                            'text-lg leading-6 font-medium flex items-center',
+                            isDarkTheme ? 'text-white' : 'text-gray-900',
+                        ]">
                             <v-icon icon="mdi-connection" class="mr-2" />
                             Connection Status
                         </h3>
@@ -39,27 +45,42 @@
                                 <div class="h-4 w-4 rounded-full bg-red-500"></div>
                             </div>
                             <div class="ml-3">
-                                <h3 :class="['text-sm font-medium', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
+                                <h3 :class="[
+                                    'text-sm font-medium',
+                                    isDarkTheme ? 'text-gray-200' : 'text-gray-900',
+                                ]">
                                     No ports connected
                                 </h3>
                             </div>
                         </div>
                         <div v-else>
-                            <h3 :class="['text-sm font-medium mb-3', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
+                            <h3 :class="[
+                                'text-sm font-medium mb-3',
+                                isDarkTheme ? 'text-gray-200' : 'text-gray-900',
+                            ]">
                                 {{ Object.keys(connectedPorts).length }} port(s) connected
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                                <div v-for="(port, path) in connectedPorts" :key="path"
-                                    :class="['flex items-center p-3 border rounded-md', isDarkTheme ? 'border-gray-700' : 'border-gray-200']">
+                                <div v-for="(port, path) in connectedPorts" :key="path" :class="[
+                                    'flex items-center p-3 border rounded-md',
+                                    isDarkTheme ? 'border-gray-700' : 'border-gray-200',
+                                ]">
                                     <div class="flex-shrink-0">
                                         <div class="h-3 w-3 rounded-full" :class="getStatusTypebyPort(path)" />
                                     </div>
                                     <div class="ml-3 flex-1">
-                                        <h3
-                                            :class="['text-sm font-medium', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
-                                            {{ path }}</h3>
-                                        <p :class="['text-xs', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
-                                            port.baudRate }} baud</p>
+                                        <h3 :class="[
+                                            'text-sm font-medium',
+                                            isDarkTheme ? 'text-gray-200' : 'text-gray-900',
+                                        ]">
+                                            {{ path }}
+                                        </h3>
+                                        <p :class="[
+                                            'text-xs',
+                                            isDarkTheme ? 'text-gray-400' : 'text-gray-500',
+                                        ]">
+                                            {{ port.baudRate }} baud
+                                        </p>
                                     </div>
                                     <button @click="togglePortReadState(path)"
                                         class="ml-2 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-white-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
@@ -78,11 +99,17 @@
 
             <!-- Available Ports -->
             <div class="px-4 py-6 sm:px-0">
-                <div
-                    :class="['overflow-hidden shadow rounded-lg divide-y', isDarkTheme ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200']">
+                <div :class="[
+                    'overflow-hidden shadow rounded-lg divide-y',
+                    isDarkTheme
+                        ? 'bg-gray-800 divide-gray-700'
+                        : 'bg-white divide-gray-200',
+                ]">
                     <div class="px-4 py-5 sm:px-6">
-                        <h3
-                            :class="['text-lg leading-6 font-medium flex items-center', isDarkTheme ? 'text-white' : 'text-gray-900']">
+                        <h3 :class="[
+                            'text-lg leading-6 font-medium flex items-center',
+                            isDarkTheme ? 'text-white' : 'text-gray-900',
+                        ]">
                             <v-icon icon="mdi-usb-port" class="mr-2" />
                             Available Ports
                         </h3>
@@ -91,21 +118,74 @@
                         <div v-if="loading" class="flex justify-center">
                             <v-progress-circular indeterminate color="primary" class="ma-4"></v-progress-circular>
                         </div>
-                        <div v-else-if="managedSerialPorts.length === 0"
-                            :class="['text-center py-4', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">
+                        <div v-else-if="managedSerialPorts.length === 0" :class="[
+                            'text-center py-4',
+                            isDarkTheme ? 'text-gray-400' : 'text-gray-500',
+                        ]">
                             No COM ports detected
                         </div>
-                        <ul v-else :class="['divide-y', isDarkTheme ? 'divide-gray-700' : 'divide-gray-200']">
+                        <ul v-else :class="[
+                            'divide-y',
+                            isDarkTheme ? 'divide-gray-700' : 'divide-gray-200',
+                        ]">
                             <li v-for="port in managedSerialPorts" :key="port.name" class="py-4 flex justify-between">
                                 <div class="flex items-center">
                                     <v-icon icon="mdi-usb" :class="[isDarkTheme ? 'text-gray-400' : 'text-gray-500']"
                                         class="mr-3" />
                                     <div>
-                                        <p
-                                            :class="['text-sm font-medium', isDarkTheme ? 'text-gray-200' : 'text-gray-900']">
-                                            {{ port.name }}</p>
-                                        <p :class="['text-xs', isDarkTheme ? 'text-gray-400' : 'text-gray-500']">{{
-                                            port.subscribedTo.length }} subscriptions</p>
+                                        <p :class="[
+                                            'text-sm font-medium',
+                                            isDarkTheme ? 'text-gray-200' : 'text-gray-900',
+                                        ]">
+                                            {{ port.name }} subscriptions
+                                        </p>
+
+                                        <div :class="[
+                                            'text-xs',
+                                            isDarkTheme ? 'text-gray-400' : 'text-gray-500',
+                                        ]">
+                                            <div class="flex flex-row items-center mb-1 gap-x-2">
+                                                subscribed to:
+
+                                                <div v-for="sub in port.subscribedTo">
+                                                    <v-chip variant="elevated"
+                                                        @click:close="removeSubscribtion(port.name, sub)" closable
+                                                        size="x-small" class="mb-1">{{ sub }}</v-chip>
+                                                </div>
+                                                <div>
+                                                    <v-chip @click="showSubscribeDialog = true; selectedPort = port"
+                                                        variant="tonal" size="x-small" class="mb-1">+</v-chip>
+                                                    <v-dialog v-model="showSubscribeDialog" max-width="500px">
+                                                        <v-card>
+                                                            <v-card-title> Select Subscriptions ({{ port.name
+                                                            }})</v-card-title>
+                                                            <v-card-text>
+                                                                <v-form>
+                                                                    <v-select chips multiple :items="managedSerialPorts"
+                                                                        item-value="name" item-title="name"
+                                                                        label="Subscription Name"
+                                                                        v-model="port.subscribedTo"></v-select>
+                                                                </v-form>
+                                                            </v-card-text>
+                                                            <v-card-actions>
+                                                                <v-btn @click="updateSubscribtion(port.name, port.name)"
+                                                                    color="primary">Update Subscriptions</v-btn>
+                                                                <v-btn
+                                                                    @click="showSubscribeDialog = false">Cancel</v-btn>
+                                                            </v-card-actions>
+                                                        </v-card>
+                                                    </v-dialog>
+                                                </div>
+                                            </div>
+
+                                            <div v-if="port.subscriptions.length > 0"
+                                                class="flex flex-row items-center mb-1 gap-x-2">
+                                                subscriptions:
+                                                <div v-for="sub in port.subscriptions">
+                                                    {{ sub }}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
@@ -114,9 +194,9 @@
                                             'inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2',
                                             connectedPorts[port.name]
                                                 ? 'bg-green-600 cursor-default'
-                                                : 'bg-primary hover:bg-primary-darken focus:ring-primary'
+                                                : 'bg-primary hover:bg-primary-darken focus:ring-primary',
                                         ]">
-                                        {{ connectedPorts[port.name] ? 'Connected' : 'Connect' }}
+                                        {{ connectedPorts[port.name] ? "Connected" : "Connect" }}
                                     </button>
                                 </div>
                             </li>
@@ -127,12 +207,18 @@
 
             <!-- Data Monitor -->
             <div v-if="Object.keys(connectedPorts).length > 0" class="px-4 py-6 sm:px-0">
-                <div
-                    :class="['overflow-hidden shadow rounded-lg divide-y', isDarkTheme ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200']">
+                <div :class="[
+                    'overflow-hidden shadow rounded-lg divide-y',
+                    isDarkTheme
+                        ? 'bg-gray-800 divide-gray-700'
+                        : 'bg-white divide-gray-200',
+                ]">
                     <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
                         <div class="flex items-center">
-                            <h3
-                                :class="['text-lg leading-6 font-medium flex items-center', isDarkTheme ? 'text-white' : 'text-gray-900']">
+                            <h3 :class="[
+                                'text-lg leading-6 font-medium flex items-center',
+                                isDarkTheme ? 'text-white' : 'text-gray-900',
+                            ]">
                                 <v-icon icon="mdi-monitor" class="mr-2" />
                                 Data Monitor
                             </h3>
@@ -140,10 +226,11 @@
                                 density="compact" hide-details class="ml-4 max-w-[200px]"></v-select>
                         </div>
                         <div class="flex space-x-2">
-                            <button @click="clearData" :class="['inline-flex items-center px-3 py-1.5 border text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2',
+                            <button @click="clearData" :class="[
+                                'inline-flex items-center px-3 py-1.5 border text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 isDarkTheme
                                     ? 'border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600 focus:ring-gray-500'
-                                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-indigo-500'
+                                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-indigo-500',
                             ]">
                                 <v-icon icon="mdi-delete" size="small" class="mr-1" />
                                 Clear
@@ -154,10 +241,10 @@
                                     ? 'border-primary-lighten text-primary bg-primary-lighten/20 hover:bg-primary-lighten/30 focus:ring-primary'
                                     : isDarkTheme
                                         ? 'border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600 focus:ring-gray-500'
-                                        : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-indigo-500'
+                                        : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-indigo-500',
                             ]">
                                 <v-icon icon="mdi-arrow-down-bold-box" size="small" class="mr-1" />
-                                Auto-scroll: {{ autoScroll ? 'ON' : 'OFF' }}
+                                Auto-scroll: {{ autoScroll ? "ON" : "OFF" }}
                             </button>
                         </div>
                     </div>
@@ -170,7 +257,7 @@
                                     'w-full px-3 py-2 border rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
                                     isDarkTheme
                                         ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500',
                                 ]" placeholder="Enter data to send..." @keyup.enter="sendDataToPort" />
                                 <button @click="sendDataToPort" :disabled="!selectedPortForSending || !sendData.trim()"
                                     class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary-darken disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
@@ -190,11 +277,17 @@
 
             <!-- Port Configuration -->
             <div v-if="Object.keys(connectedPorts).length > 0" class="px-4 py-6 sm:px-0">
-                <div
-                    :class="['overflow-hidden shadow rounded-lg divide-y', isDarkTheme ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200']">
+                <div :class="[
+                    'overflow-hidden shadow rounded-lg divide-y',
+                    isDarkTheme
+                        ? 'bg-gray-800 divide-gray-700'
+                        : 'bg-white divide-gray-200',
+                ]">
                     <div class="px-4 py-5 sm:px-6 flex items-center">
-                        <h3
-                            :class="['text-lg leading-6 font-medium flex items-center', isDarkTheme ? 'text-white' : 'text-gray-900']">
+                        <h3 :class="[
+                            'text-lg leading-6 font-medium flex items-center',
+                            isDarkTheme ? 'text-white' : 'text-gray-900',
+                        ]">
                             <v-icon icon="mdi-cog" class="mr-2" />
                             Port Configuration
                         </h3>
@@ -204,36 +297,44 @@
                     <div class="px-4 py-5 sm:p-6">
                         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-4">
                             <div>
-                                <label
-                                    :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Baud
-                                    Rate</label>
+                                <label :class="[
+                                    'block text-sm font-medium mb-1',
+                                    isDarkTheme ? 'text-gray-300' : 'text-gray-700',
+                                ]">Baud Rate</label>
                                 <v-select v-model="portConfig.baudRate" :items="baudRates" density="compact"
                                     :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
-                                <label
-                                    :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Data
-                                    Bits</label>
-                                <v-select v-model="portConfig.dataBits"
-                                    :items="[DataBits.Eight, DataBits.Five, DataBits.Seven, DataBits.Six]"
-                                    density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
+                                <label :class="[
+                                    'block text-sm font-medium mb-1',
+                                    isDarkTheme ? 'text-gray-300' : 'text-gray-700',
+                                ]">Data Bits</label>
+                                <v-select v-model="portConfig.dataBits" :items="[
+                                    DataBits.Eight,
+                                    DataBits.Five,
+                                    DataBits.Seven,
+                                    DataBits.Six,
+                                ]" density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
-                                <label
-                                    :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Stop
-                                    Bits</label>
+                                <label :class="[
+                                    'block text-sm font-medium mb-1',
+                                    isDarkTheme ? 'text-gray-300' : 'text-gray-700',
+                                ]">Stop Bits</label>
                                 <v-select v-model="portConfig.stopBits" :items="[StopBits.One, StopBits.Two]"
                                     density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
-                                <label
-                                    :class="['block text-sm font-medium mb-1', isDarkTheme ? 'text-gray-300' : 'text-gray-700']">Parity</label>
+                                <label :class="[
+                                    'block text-sm font-medium mb-1',
+                                    isDarkTheme ? 'text-gray-300' : 'text-gray-700',
+                                ]">Parity</label>
                                 <v-select v-model="portConfig.parity" :items="[
                                     { title: 'None', value: 'none' },
                                     { title: 'Even', value: 'even' },
                                     { title: 'Odd', value: 'odd' },
                                     { title: 'Mark', value: 'mark' },
-                                    { title: 'Space', value: 'space' }
+                                    { title: 'Space', value: 'space' },
                                 ]" item-title="title" item-value="value" density="compact"
                                     :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
@@ -251,42 +352,70 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick, computed } from 'vue';
-import { useTheme } from 'vuetify';
+import { ref, onMounted, watch, nextTick, computed } from "vue";
+import { useTheme } from "vuetify";
 
-import { getSerialPorts, openSerialPort } from '@/api/api';
-import { storeToRefs } from 'pinia';
-import { useAppStore } from '@/stores/app';
-import { DataBits, FlowControl, OpenSerialPortOptions, Parity, StopBits } from '@/models/open-options';
-import { ReadState, StatusType } from '@/models/managed-serial-port';
-
+import { getSerialPorts, openSerialPort } from "@/api/api";
+import { storeToRefs } from "pinia";
+import { useAppStore } from "@/stores/app";
+import {
+    DataBits,
+    FlowControl,
+    OpenSerialPortOptions,
+    Parity,
+    StopBits,
+} from "@/models/open-options";
+import { ManagedSerialPort, ReadState, StatusType } from "@/models/managed-serial-port";
 
 const app = useAppStore();
 
-const { portData, managedSerialPorts } = storeToRefs(app)
-const { addPortData } = app
+const { portData, managedSerialPorts } = storeToRefs(app);
+const { addPortData } = app;
 
 // Vuetify theme
 const theme = useTheme();
 const isDarkTheme = ref(theme.global.current.value.dark);
 
 const toggleTheme = () => {
-    theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark';
+    theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
     isDarkTheme.value = !isDarkTheme.value;
 };
 
-// State
-
+const showSubscribeDialog = ref(false);
 const connectedPorts = ref<Record<string, OpenSerialPortOptions>>({});
 const loading = ref(false);
+const selectedPort = ref<ManagedSerialPort>()
+
+const tempSubscribtion = ref<string[]>([]);
 
 
-const sendData = ref<string>('');
+watch(showSubscribeDialog, () => {
+    tempSubscribtion.value = [];
+})
+
+
+const updateSubscribtion = async (from: string, to: string) => {
+    await app.subscribe(from, to);
+
+
+}
+
+
+const removeSubscribtion = async (from: string, to: string) => {
+    console.debug("removeSubscribtion", from, to);
+
+    await app.unsubscribe(from, to);
+
+};
+
+const sendData = ref<string>("");
 const autoScroll = ref<boolean>(true);
-const dataMonitor = ref<{ scrollTop: number, scrollHeight: number } | null>(null);
-const selectedPortForMonitor = ref('all');
-const selectedPortForSending = ref('');
-const selectedPortForConfig = ref('');
+const dataMonitor = ref<{ scrollTop: number; scrollHeight: number } | null>(
+    null
+);
+const selectedPortForMonitor = ref("all");
+const selectedPortForSending = ref("");
+const selectedPortForConfig = ref("");
 const portConfig = ref<OpenSerialPortOptions>({
     baudRate: 115200,
     dataBits: DataBits.Eight,
@@ -294,7 +423,7 @@ const portConfig = ref<OpenSerialPortOptions>({
     parity: Parity.None,
     flowControl: FlowControl.Hardware,
     initialReadState: ReadState.Read,
-    tag: '',
+    tag: "",
     timeout: {
         nanos: 0,
         secs: 0,
@@ -306,7 +435,7 @@ const baudRates = [300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
 
 // Computed
 const monitorPortItems = computed(() => {
-    const items = [{ title: 'All Ports', value: 'all' }];
+    const items = [{ title: "All Ports", value: "all" }];
     for (const path in connectedPorts.value) {
         items.push({ title: path, value: path });
     }
@@ -330,11 +459,11 @@ const configPortItems = computed(() => {
 });
 
 const filteredData = computed<string[]>(() => {
-    if (selectedPortForMonitor.value === 'all') {
+    if (selectedPortForMonitor.value === "all") {
         // Flatten all port data into a single array
         const allData: string[] = [];
         for (const path in portData.value) {
-            portData.value[path].forEach(line => {
+            portData.value[path].forEach((line) => {
                 allData.push(`[${path}] ${line}`);
             });
         }
@@ -343,7 +472,7 @@ const filteredData = computed<string[]>(() => {
     } else {
         // Return data only for the selected port
         return (portData.value[selectedPortForMonitor.value] || []).map(
-            line => `[${selectedPortForMonitor.value}]${line}`
+            (line) => `[${selectedPortForMonitor.value}]${line}`
         );
     }
 });
@@ -355,33 +484,35 @@ const refreshPorts = async () => {
         // In a real application, you would use the Web Serial API or a backend service
         // to get the available ports. For this demo, we'll simulate it.
 
-        getSerialPorts().then(ports => {
+        getSerialPorts().then((ports) => {
             managedSerialPorts.value = ports;
         });
 
-        managedSerialPorts.value.forEach(port => {
+        managedSerialPorts.value.forEach((port) => {
             if (port.status.type === StatusType.Open) {
-
-                connectedPorts.value[port.name] = port.lastUsedOpenOptions
+                connectedPorts.value[port.name] = port.lastUsedOpenOptions;
             }
         });
-
-
-
     } catch (error: unknown) {
-        console.error('Error refreshing ports:', error);
-        addPortData('system', `Error: ${(error as Record<string, string>).message}`);
+        console.error("Error refreshing ports:", error);
+        addPortData(
+            "system",
+            `Error: ${(error as Record<string, string>).message}`
+        );
     } finally {
         loading.value = false;
     }
 };
 
-const connectToPort = async (portPath: string, options: OpenSerialPortOptions) => {
+const connectToPort = async (
+    portPath: string,
+    options: OpenSerialPortOptions
+) => {
     try {
         // In a real application, you would use the Web Serial API or a backend service
         // to connect to the port. For this demo, we'll simulate it.
 
-        connectedPorts.value[portPath] = options
+        connectedPorts.value[portPath] = options;
 
         managedSerialPorts.value = await openSerialPort(portPath, options);
 
@@ -391,7 +522,7 @@ const connectToPort = async (portPath: string, options: OpenSerialPortOptions) =
         }
 
         // Store port configuration
-        connectedPorts.value[portPath] = options
+        connectedPorts.value[portPath] = options;
 
         // Set as selected port if it's the first one
         if (Object.keys(connectedPorts.value).length === 1) {
@@ -405,10 +536,13 @@ const connectToPort = async (portPath: string, options: OpenSerialPortOptions) =
         addPortData(portPath, `Data bits: ${portConfig.value.dataBits}`);
         addPortData(portPath, `Stop bits: ${portConfig.value.stopBits}`);
         addPortData(portPath, `Parity: ${portConfig.value.parity}`);
-        addPortData(portPath, 'Waiting for data...');
+        addPortData(portPath, "Waiting for data...");
     } catch (error: unknown) {
-        console.error('Error connecting to port:', error);
-        addPortData(portPath, `Error:  ${(error as Record<string, string>).message}`);
+        console.error("Error connecting to port:", error);
+        addPortData(
+            portPath,
+            `Error:  ${(error as Record<string, string>).message}`
+        );
     }
 };
 
@@ -419,31 +553,30 @@ const togglePortReadState = async (portPath: string) => {
 };
 
 const getStatusTypebyPort = (path: string): string => {
-
-    const status = managedSerialPorts.value.find(port => port.name === path)?.status
+    const status = managedSerialPorts.value.find(
+        (port) => port.name === path
+    )?.status;
 
     switch (status?.type) {
         case StatusType.Open:
-
             switch (status.content.readState) {
                 case ReadState.Read:
-                    return 'bg-green-500';
+                    return "bg-green-500";
                 case ReadState.Stop:
-                    return 'bg-yellow-500';
+                    return "bg-yellow-500";
             }
         case StatusType.Closed:
-            return 'bg-red-500';
+            return "bg-red-500";
         default:
-            return 'bg-gray-500';
+            return "bg-gray-500";
     }
 };
-
 
 const disconnectPort = async (portPath: string) => {
     try {
         // In a real application, you would use the Web Serial API or a backend service
         // to disconnect from the port. For this demo, we'll simulate it.
-        await app.closeSerialPort(portPath)
+        await app.closeSerialPort(portPath);
 
         addPortData(portPath, `Disconnected from ${portPath}`);
 
@@ -453,19 +586,22 @@ const disconnectPort = async (portPath: string) => {
 
         // Update selected ports if needed
         if (selectedPortForSending.value === portPath) {
-            selectedPortForSending.value = Object.keys(connectedPorts.value)[0] || '';
+            selectedPortForSending.value = Object.keys(connectedPorts.value)[0] || "";
         }
 
         if (selectedPortForConfig.value === portPath) {
-            selectedPortForConfig.value = Object.keys(connectedPorts.value)[0] || '';
+            selectedPortForConfig.value = Object.keys(connectedPorts.value)[0] || "";
         }
 
         if (selectedPortForMonitor.value === portPath) {
-            selectedPortForMonitor.value = 'all';
+            selectedPortForMonitor.value = "all";
         }
     } catch (error) {
-        console.error('Error disconnecting from port:', error);
-        addPortData(portPath, `Error: ${(error as Record<string, string>).message}`);
+        console.error("Error disconnecting from port:", error);
+        addPortData(
+            portPath,
+            `Error: ${(error as Record<string, string>).message}`
+        );
     }
 };
 
@@ -475,8 +611,7 @@ const sendDataToPort = async () => {
     const portPath = selectedPortForSending.value;
 
     try {
-
-        await app.sendToSerialPort(portPath, sendData.value)
+        await app.sendToSerialPort(portPath, sendData.value);
 
         // In a real application, you would use the Web Serial API or a backend service
         // to send data to the port. For this demo, we'll simulate it.
@@ -486,15 +621,18 @@ const sendDataToPort = async () => {
             scrollToBottom();
         }, 300);
 
-        sendData.value = '';
+        sendData.value = "";
     } catch (error) {
-        console.error('Error sending data:', error);
-        addPortData(portPath, `Error: ${(error as Record<string, string>).message}`);
+        console.error("Error sending data:", error);
+        addPortData(
+            portPath,
+            `Error: ${(error as Record<string, string>).message}`
+        );
     }
 };
 
 const clearData = () => {
-    if (selectedPortForMonitor.value === 'all') {
+    if (selectedPortForMonitor.value === "all") {
         // Clear all port data
         portData.value = {};
         for (const path in connectedPorts.value) {
@@ -526,9 +664,9 @@ const applyPortConfig = () => {
     const portPath = selectedPortForConfig.value;
 
     // Update port configuration
-    connectedPorts.value[portPath] = portConfig.value
+    connectedPorts.value[portPath] = portConfig.value;
 
-    addPortData(portPath, 'Applying new configuration:');
+    addPortData(portPath, "Applying new configuration:");
     addPortData(portPath, `Baud rate: ${portConfig.value.baudRate}`);
     addPortData(portPath, `Data bits: ${portConfig.value.dataBits}`);
     addPortData(portPath, `Stop bits: ${portConfig.value.stopBits}`);
@@ -536,27 +674,32 @@ const applyPortConfig = () => {
     scrollToBottom();
 };
 
-
-
 // Lifecycle hooks
 onMounted(() => {
     refreshPorts();
 });
 
-watch(portData, () => {
-    if (autoScroll.value) {
-        scrollToBottom();
-    }
-}, { deep: true });
-
+watch(
+    portData,
+    () => {
+        if (autoScroll.value) {
+            scrollToBottom();
+        }
+    },
+    { deep: true }
+);
 
 // Watchers
-watch(connectedPorts, (newVal) => {
-    // If there are no connected ports, reset the port data
-    if (Object.keys(newVal).length === 0) {
-        portData.value = {};
-    }
-}, { deep: true });
+watch(
+    connectedPorts,
+    (newVal) => {
+        // If there are no connected ports, reset the port data
+        if (Object.keys(newVal).length === 0) {
+            portData.value = {};
+        }
+    },
+    { deep: true }
+);
 </script>
 
 <style scoped>
@@ -632,6 +775,6 @@ watch(connectedPorts, (newVal) => {
 
 /* Terminal styles */
 .font-mono {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
 }
 </style>

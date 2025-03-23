@@ -9,8 +9,8 @@ export const useAppStore = defineStore("app", () => {
   const packets = ref<Record<string, PacketData[]>>({});
   const portData = ref<{ [key: string]: string[] }>({});
 
-  function getSerialPorts() {
-    api
+  async function getSerialPorts() {
+    await api
       .getSerialPorts()
       .then((response) => {
         managedSerialPorts.value = response;
@@ -42,8 +42,10 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function subscribe(from: string, to: string) {
-    api
+  async function subscribe(from: string, to: string) {
+    console.log("subscribe", from, to);
+
+    await api
       .subscribe(from, to)
       .then((response) => {
         managedSerialPorts.value = response;
@@ -53,8 +55,8 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function unsubscribe(from: string, to: string) {
-    api
+  async function unsubscribe(from: string, to: string) {
+    await api
       .unsubscribe(from, to)
       .then((response) => {
         managedSerialPorts.value = response;
