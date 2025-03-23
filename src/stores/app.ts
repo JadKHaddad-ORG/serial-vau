@@ -7,9 +7,10 @@ import * as api from "@/api/api";
 export const useAppStore = defineStore("app", () => {
   const managedSerialPorts = ref<ManagedSerialPort[]>([]);
   const packets = ref<Record<string, PacketData[]>>({});
+  const portData = ref<{ [key: string]: string[] }>({});
 
-  function getSerialPorts() {
-    api
+  async function getSerialPorts() {
+    await api
       .getSerialPorts()
       .then((response) => {
         managedSerialPorts.value = response;
@@ -19,8 +20,8 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function openSerialPort(name: string, options: OpenSerialPortOptions) {
-    api
+  async function openSerialPort(name: string, options: OpenSerialPortOptions) {
+    await api
       .openSerialPort(name, options)
       .then((response) => {
         managedSerialPorts.value = response;
@@ -30,8 +31,8 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function closeSerialPort(name: string) {
-    api
+  async function closeSerialPort(name: string) {
+    await api
       .closeSerialPort(name)
       .then((response) => {
         managedSerialPorts.value = response;
@@ -41,8 +42,10 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function subscribe(from: string, to: string) {
-    api
+  async function subscribe(from: string, to: string) {
+    console.log("subscribe", from, to);
+
+    await api
       .subscribe(from, to)
       .then((response) => {
         managedSerialPorts.value = response;
@@ -52,8 +55,8 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function unsubscribe(from: string, to: string) {
-    api
+  async function unsubscribe(from: string, to: string) {
+    await api
       .unsubscribe(from, to)
       .then((response) => {
         managedSerialPorts.value = response;
@@ -63,25 +66,26 @@ export const useAppStore = defineStore("app", () => {
       });
   }
 
-  function toggleReadState(name: string) {
-    api
+  async function toggleReadState(name: string) {
+    await api
       .toggleReadState(name)
       .then((response) => {
         managedSerialPorts.value = response;
+        return response;
       })
       .catch((error) => {
         console.error("Error toggling read state:", error);
       });
   }
 
-  function sendToSerialPort(name: string, value: string) {
-    api.sendToSerialPort(name, value).catch((error) => {
+  async function sendToSerialPort(name: string, value: string) {
+    await api.sendToSerialPort(name, value).catch((error) => {
       console.error(error);
     });
   }
 
-  function sendToAllSerialPorts(value: string) {
-    api.sendToAllSerialPorts(value).catch((error) => {
+  async function sendToAllSerialPorts(value: string) {
+    await api.sendToAllSerialPorts(value).catch((error) => {
       console.error(error);
     });
   }
@@ -90,10 +94,20 @@ export const useAppStore = defineStore("app", () => {
    * Adds a packet to the corresponding port.
    * If the port does not exist, it will be created.
    */
+
+  function addPortData(portName: string, data: string) {
+    if (!portData.value[portName]) {
+      portData.value[portName] = [];
+    }
+
+    portData.value[portName].push(data);
+  }
+
   function addPacket(portName: string, data: PacketData) {
     if (!packets.value[portName]) {
       packets.value[portName] = [];
     }
+
     packets.value[portName].push(data);
   }
 
@@ -109,5 +123,7 @@ export const useAppStore = defineStore("app", () => {
     sendToSerialPort,
     sendToAllSerialPorts,
     addPacket,
+    addPortData,
+    portData,
   };
 });

@@ -53,7 +53,7 @@
                     </v-btn>
                 </template>
                 <v-list>
-                    <v-list-item v-for="( managedPort, _) in app.managedSerialPorts" :key="managedPort.name"
+                    <v-list-item v-for="(managedPort, _) in app.managedSerialPorts" :key="managedPort.name"
                         @click="subscribe(managedPort.name, port.name)">
                         <v-list-item-title>{{ managedPort.name }}</v-list-item-title>
                     </v-list-item>
@@ -96,8 +96,8 @@ const closeSerialPort = () => {
     app.closeSerialPort(props.port.name);
 }
 
-const subscribe = (from: string, to: string) => {
-    app.subscribe(from, to);
+const subscribe = async (from: string, to: string) => {
+    await app.subscribe(from, to);
 };
 
 const unsubscribe = (from: string, to: string) => {
