@@ -30,7 +30,6 @@ export const useListener = (app = useAppStore()) => {
   };
 
   const onSerialPortPacketEventListener = async (event: Event<PacketEvent>) => {
-    console.debug(event);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const packet = event.payload.packet;
 
