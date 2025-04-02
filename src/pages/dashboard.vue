@@ -1,4 +1,25 @@
 <template>
+    <v-dialog v-model="showSubscribeDialog" v-if="selectedDialogPort" max-width="500px">
+        <v-card>
+            <v-card-title> Select Subscriptions ({{ selectedDialogPort!.name
+            }})</v-card-title>
+            <v-card-text>
+                <v-form>
+                    <v-select chips multiple :items="managedSerialPorts" item-value="name" item-title="name"
+                        label="Subscription Name" v-model="selectedDialogPort!.subscribedTo"></v-select>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn @click="updateSubscribtion(selectedDialogPort!.name, selectedDialogPort!.subscribedTo)"
+                    color="primary">Update
+                    Subscriptions</v-btn>
+                <v-btn @click="showSubscribeDialog = false">Cancel</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+
+
     <div :class="['min-h-screen', isDarkTheme ? 'dark bg-gray-900' : 'bg-gray-50']">
         <header class="bg-primary text-white shadow-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,7 +158,7 @@
                                             'text-sm font-medium',
                                             isDarkTheme ? 'text-gray-200' : 'text-gray-900',
                                         ]">
-                                            {{ port.name }} subscriptions
+                                            {{ port.name }}
                                         </p>
 
                                         <div :class="[
@@ -149,32 +170,12 @@
 
                                                 <div v-for="sub in port.subscribedTo">
                                                     <v-chip variant="elevated"
-                                                        @click:close="removeSubscribtion(port.name, sub)" closable
+                                                        @click:close="removeSubscribtion(sub, port.name)" closable
                                                         size="x-small" class="mb-1">{{ sub }}</v-chip>
                                                 </div>
                                                 <div>
-                                                    <v-chip @click="showSubscribeDialog = true; selectedPort = port"
+                                                    <v-chip @click="selectedDialogPort = port; showSubscribeDialog"
                                                         variant="tonal" size="x-small" class="mb-1">+</v-chip>
-                                                    <v-dialog v-model="showSubscribeDialog" max-width="500px">
-                                                        <v-card>
-                                                            <v-card-title> Select Subscriptions ({{ port.name
-                                                            }})</v-card-title>
-                                                            <v-card-text>
-                                                                <v-form>
-                                                                    <v-select chips multiple :items="managedSerialPorts"
-                                                                        item-value="name" item-title="name"
-                                                                        label="Subscription Name"
-                                                                        v-model="port.subscribedTo"></v-select>
-                                                                </v-form>
-                                                            </v-card-text>
-                                                            <v-card-actions>
-                                                                <v-btn @click="updateSubscribtion(port.name, port.name)"
-                                                                    color="primary">Update Subscriptions</v-btn>
-                                                                <v-btn
-                                                                    @click="showSubscribeDialog = false">Cancel</v-btn>
-                                                            </v-card-actions>
-                                                        </v-card>
-                                                    </v-dialog>
                                                 </div>
                                             </div>
 
@@ -283,15 +284,17 @@
                         ? 'bg-gray-800 divide-gray-700'
                         : 'bg-white divide-gray-200',
                 ]">
-                    <div class="px-4 py-5 sm:px-6 flex items-center">
+                    <div class="px-4 py-5 sm:px-6 flex items-center" :aria-disabled="true">
                         <h3 :class="[
                             'text-lg leading-6 font-medium flex items-center',
                             isDarkTheme ? 'text-white' : 'text-gray-900',
                         ]">
                             <v-icon icon="mdi-cog" class="mr-2" />
+                            <v-chip color="warning" size="small">Coming Soon </v-chip>
+
                             Port Configuration
                         </h3>
-                        <v-select v-model="selectedPortForConfig" :items="configPortItems" variant="underlined"
+                        <v-select disabled v-model="selectedPortForConfig" :items="configPortItems" variant="underlined"
                             density="compact" hide-details class="ml-4 max-w-[200px]"></v-select>
                     </div>
                     <div class="px-4 py-5 sm:p-6">
@@ -301,7 +304,7 @@
                                     'block text-sm font-medium mb-1',
                                     isDarkTheme ? 'text-gray-300' : 'text-gray-700',
                                 ]">Baud Rate</label>
-                                <v-select v-model="portConfig.baudRate" :items="baudRates" density="compact"
+                                <v-select disabled v-model="portConfig.baudRate" :items="baudRates" density="compact"
                                     :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
@@ -309,7 +312,7 @@
                                     'block text-sm font-medium mb-1',
                                     isDarkTheme ? 'text-gray-300' : 'text-gray-700',
                                 ]">Data Bits</label>
-                                <v-select v-model="portConfig.dataBits" :items="[
+                                <v-select disabled v-model="portConfig.dataBits" :items="[
                                     DataBits.Eight,
                                     DataBits.Five,
                                     DataBits.Seven,
@@ -321,7 +324,7 @@
                                     'block text-sm font-medium mb-1',
                                     isDarkTheme ? 'text-gray-300' : 'text-gray-700',
                                 ]">Stop Bits</label>
-                                <v-select v-model="portConfig.stopBits" :items="[StopBits.One, StopBits.Two]"
+                                <v-select disabled v-model="portConfig.stopBits" :items="[StopBits.One, StopBits.Two]"
                                     density="compact" :bg-color="isDarkTheme ? 'grey-darken-3' : 'white'"></v-select>
                             </div>
                             <div>
@@ -329,7 +332,7 @@
                                     'block text-sm font-medium mb-1',
                                     isDarkTheme ? 'text-gray-300' : 'text-gray-700',
                                 ]">Parity</label>
-                                <v-select v-model="portConfig.parity" :items="[
+                                <v-select disabled v-model="portConfig.parity" :items="[
                                     { title: 'None', value: 'none' },
                                     { title: 'Even', value: 'even' },
                                     { title: 'Odd', value: 'odd' },
@@ -386,6 +389,9 @@ const connectedPorts = ref<Record<string, OpenSerialPortOptions>>({});
 const loading = ref(false);
 const selectedPort = ref<ManagedSerialPort>()
 
+const selectedDialogPort = ref<ManagedSerialPort | null>(null);
+
+
 const tempSubscribtion = ref<string[]>([]);
 
 
@@ -394,18 +400,14 @@ watch(showSubscribeDialog, () => {
 })
 
 
-const updateSubscribtion = async (from: string, to: string) => {
-    await app.subscribe(from, to);
-
+const updateSubscribtion = async (from: string, to: string[]) => {
+    to.forEach(async (sub) => {
+        await app.subscribe(sub, from);
+    });
 
 }
-
-
 const removeSubscribtion = async (from: string, to: string) => {
-    console.debug("removeSubscribtion", from, to);
-
     await app.unsubscribe(from, to);
-
 };
 
 const sendData = ref<string>("");
