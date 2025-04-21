@@ -1,13 +1,4 @@
-# Serial Vau
-
-<div style="text-align:center">
-    <img src="./logo.png" />
-</div>
-
-<div style="text-align:center" color="red">
-    Welcome to <b>Serial Vau </b> A Monitoring Tool for sending and reaciving data.
-
-</div>
+![serial-vau](https://socialify.git.ci/JadKHaddad-ORG/serial-vau/image?custom_description=A+vue+rusty+way+to+do+monitoring+com+ports+and+more+%E2%9C%A8&description=1&font=Inter&logo=https%3A%2F%2Fraw.githubusercontent.com%2FJadKHaddad-ORG%2Fserial-vau%2Frefs%2Fheads%2Fmain%2Flogo.png&name=1&pattern=Signal&stargazers=1&theme=Dark)
 
 
 ## Setup
