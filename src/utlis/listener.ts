@@ -1,8 +1,7 @@
 import { storeToRefs } from "pinia";
 import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { ref } from "vue";
-import { ManagedSerialPortsEvent } from "@/events";
-import { PacketData } from "@/models/intern/packet-data";
+import { ManagedSerialPortsEvent, PacketEvent } from "@/events";
 import {
   listenErrorEvent,
   listenPacketEvent,
@@ -11,10 +10,11 @@ import {
 } from "@/api/listener";
 import { useAppStore } from "@/stores/app";
 import { useTheme } from "vuetify";
+import { PacketDirectionType, PacketOriginType } from "@/models/packet";
 
 export const useListener = (app = useAppStore()) => {
   const { managedSerialPorts } = storeToRefs(app);
-  const { addPacket, getSerialPorts } = app;
+  const { addPortData, getSerialPorts } = app;
   const theme = useTheme();
 
   const themeChangedEventListener = ref<UnlistenFn>();
@@ -29,15 +29,41 @@ export const useListener = (app = useAppStore()) => {
     }
   };
 
-  const onSerialPortPacketEventListener = (event: Event<any>) => {
+  const onSerialPortPacketEventListener = async (event: Event<PacketEvent>) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const packet = event.payload.packet;
 
-    const packetData: PacketData = {
-      packetDirection: packet.packetDirection,
-      timestampMillis: packet.timestampMillis,
-    };
+    switch (packet.packetDirection.type) {
+      case PacketDirectionType.Incoming:
+        addPortData(
+          packet.portName,
+          `Incoming: ${packet.packetDirection.content.line}`
+        );
+        break;
+      case PacketDirectionType.Outgoing:
+        const packetDirectonContent = packet.packetDirection.content;
 
-    addPacket(packet.portName, packetData);
+        switch (packetDirectonContent.packetOrigin.type) {
+          case PacketOriginType.Direct:
+            addPortData(
+              packet.portName,
+              `Direct: ${packetDirectonContent.value}`
+            );
+            break;
+          case PacketOriginType.Broadcast:
+            addPortData(
+              packet.portName,
+              `Broadcast: ${packetDirectonContent.value}`
+            );
+            break;
+          case PacketOriginType.Subscription:
+            addPortData(
+              packet.portName,
+              `Subscription[${packetDirectonContent.packetOrigin.content.name}]: ${packetDirectonContent.value}`
+            );
+            break;
+        }
+    }
   };
 
   const onSerialPortEventListener = (event: Event<ManagedSerialPortsEvent>) => {

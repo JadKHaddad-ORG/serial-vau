@@ -9,6 +9,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppDrawer: typeof import('./components/AppDrawer.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    BasePopover: typeof import('./components/base/BasePopover.vue')['default']
+    BasePopOver: typeof import('./components/base/BasePopOver.vue')['default']
     Breadcrumb: typeof import('./components/ui/breadcrumb/Breadcrumb.vue')['default']
     BreadcrumbEllipsis: typeof import('./components/ui/breadcrumb/BreadcrumbEllipsis.vue')['default']
     BreadcrumbItem: typeof import('./components/ui/breadcrumb/BreadcrumbItem.vue')['default']
@@ -35,6 +37,7 @@ declare module 'vue' {
     Label: typeof import('./components/ui/label/Label.vue')['default']
     MessageList: typeof import('./components/com/MessageList.vue')['default']
     MessageListItem: typeof import('./components/com/MessageListItem.vue')['default']
+    PopOver: typeof import('./components/base/PopOver.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Separator: typeof import('./components/ui/separator/Separator.vue')['default']
