@@ -23,6 +23,7 @@
     "vuetify": "^3.6.11"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4",
     "@babel/types": "^7.24.7",
     "@pinia/testing": "^0.1.6",
     "@types/node": "^20.17.6",

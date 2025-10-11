@@ -10,7 +10,7 @@ import {
   sendToAllSerialPorts,
   SerialVauApi,
 } from "@/api/api";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import {
   DataBits,
   FlowControl,
@@ -50,6 +50,7 @@ describe("Serial API functions", () => {
       parity: Parity.Even,
       stopBits: StopBits.One,
       timeout: { nanos: 1, secs: 10 },
+      tag: "any",
     };
     mockInvoke.mockResolvedValue(mockResponse);
 

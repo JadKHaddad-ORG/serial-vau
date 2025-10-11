@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 use crate::{
     app::state::error::AppManagedSerialPortsError,
@@ -20,7 +20,7 @@ pub async fn emit_managed_serial_ports_event(
         ports: managed_serial_ports,
     };
 
-    app.emit_all(SERIAL_PORTS_EVENT, &managed_serial_ports_event)?;
+    app.emit(SERIAL_PORTS_EVENT, &managed_serial_ports_event)?;
 
     Ok(())
 }

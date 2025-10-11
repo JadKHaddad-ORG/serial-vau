@@ -1,6 +1,6 @@
 import { ManagedSerialPort } from "@/models/managed-serial-port";
 import { OpenSerialPortOptions } from "@/models/open-options";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 
 export enum SerialVauApi {
   GET_SERIAL_PORTS = "get_serial_ports",
