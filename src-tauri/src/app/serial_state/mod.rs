@@ -222,13 +222,13 @@ impl StateInner {
     ///
     /// ## Locks
     ///
+    /// - Write: [`Self::open_serial_ports`].
     #[cfg_attr(
         feature = "subscriptions",
         doc = "
     - Write: [`Self::subscriptions`]. Inherited from [`Self::remove_open_serial_port_from_all_subscriptions`].
     "
     )]
-    /// - Write: [`Self::open_serial_ports`].
     async fn remove_open_serial_port(&self, name: &str) -> Option<CoreOpenSerialPort> {
         tracing::debug!(name=%name, "Removing serial port");
 
@@ -242,13 +242,13 @@ impl StateInner {
     ///
     /// ## Locks
     ///
+    /// - Write: [`Self::open_serial_ports`]. Inherited from [`Self::remove_open_serial_port`].
     #[cfg_attr(
         feature = "subscriptions",
         doc = "
     - Write: [`Self::subscriptions`]. Inherited from [`Self::remove_open_serial_port`].
     "
     )]
-    /// - Write: [`Self::open_serial_ports`]. Inherited from [`Self::remove_open_serial_port`].
     pub async fn remove_and_cancel_open_serial_port(
         &self,
         name: &str,
