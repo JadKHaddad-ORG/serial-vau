@@ -10,7 +10,7 @@ import {
   sendToAllSerialPorts,
   SerialVauApi,
 } from "@/api/api";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import {
   DataBits,
   FlowControl,
@@ -20,7 +20,7 @@ import {
 } from "@/models/open-options";
 import { ReadState } from "@/models/managed-serial-port";
 
-vi.mock("@tauri-apps/api", () => ({
+vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
 }));
 
@@ -50,6 +50,7 @@ describe("Serial API functions", () => {
       parity: Parity.Even,
       stopBits: StopBits.One,
       timeout: { nanos: 1, secs: 10 },
+      tag: "any",
     };
     mockInvoke.mockResolvedValue(mockResponse);
 

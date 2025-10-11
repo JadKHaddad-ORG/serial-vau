@@ -1,4 +1,4 @@
-use tauri::InvokeError;
+use tauri::ipc::InvokeError;
 
 #[derive(Debug)]
 pub struct AppError {
