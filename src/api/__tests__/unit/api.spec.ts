@@ -20,7 +20,7 @@ import {
 } from "@/models/open-options";
 import { ReadState } from "@/models/managed-serial-port";
 
-vi.mock("@tauri-apps/api", () => ({
+vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
 }));
 
